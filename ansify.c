@@ -69,7 +69,7 @@ main ( int argc, char *argv[])
     }
 
   while(argv[optind]) {
-    struct pixel pixel = {0, 0, .prev = {0, 0}};
+    struct pixel pixel = {0, 0, .prev = {-30, -30}};
     struct image orig;
 
     //Load image
