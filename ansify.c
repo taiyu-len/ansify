@@ -46,22 +46,22 @@ main ( int argc, char *argv[])
   while((c = getopt(argc, argv, "k:t:d:")) != -1)
     switch(c) {
       case 'k'://colorkey
-        if(sscanf(optarg,"%x:%x:%x",key, key+1, key+2) < 3) {
-          fprintf(stderr,"invalid  input. -k %%x:%%x:%%x\n");
+        if(sscanf(optarg, "%x:%x:%x", key, key+1, key+2) < 3) {
+          fprintf(stderr, "invalid  input. -k %%x:%%x:%%x\n");
           key[0] = key[1] = key[2] = -999;
           continue;
         }
       case 't'://threshhold
-        thresh = strtol(optarg,NULL, 10);
+        thresh = strtol(optarg, NULL, 10);
         if(errno) {
-          fprintf(stderr,"invalid input. -t %%d\n");
+          fprintf(stderr, "invalid input. -t %%d\n");
           thresh = 10;
           continue;
         }
-      case 'd'://threshhold
-        delay = strtol(optarg,NULL, 10);
+      case 'd'://Delay
+        delay = strtol(optarg, NULL, 10);
         if(errno) {
-          fprintf(stderr,"invalid input. -t %%d\n");
+          fprintf(stderr, "invalid input. -t %%d\n");
           thresh = 10;
           continue;
         }
@@ -75,14 +75,21 @@ main ( int argc, char *argv[])
     //Load image
     if((orig.data = stbi_load(argv[optind++]
         , &orig.width, &orig.height, &orig.comp, 0)) == NULL) {
-      if(errno){ perror(NULL); errno=0;}
-      else       fputs("Invalid image file\n\n", stderr);
+      if(errno){
+        perror(NULL); errno=0;
+      } else {
+        fputs("Invalid image file\n\n", stderr);
+      }
       continue;
     }
-    for(; pixel.y < orig.height; pixel.y+=2, delay?usleep(delay):0)
-      for(pixel.x = 0; pixel.x < orig.width; ++pixel.x)
+    for(; pixel.y < orig.height; pixel.y+=2) {
+      for(pixel.x = 0; pixel.x < orig.width; ++pixel.x) {
         print_pixel(&orig, &pixel);
-
+      }
+      if(delay) {
+        usleep(delay);
+      }
+    }
     stbi_image_free(orig.data);
   }
   return EXIT_SUCCESS;
@@ -101,30 +108,32 @@ convert_pixel(struct image *image, int x, int y)
 
   if( a < 2 ||(abs(r-key[0]) <= thresh
             && abs(g-key[1]) <= thresh
-            && abs(b-key[2]) <= thresh))
+            && abs(b-key[2]) <= thresh)) {
     return BLANK;
+  }
   //Check for grey scale, and calculate it better
   if( abs(r-bw) < (256/24)
       && abs(g-bw) < (256/24)
-      && abs(b-bw) < (256/24))
+      && abs(b-bw) < (256/24)) {
     return 0xE8 + bw * 24 / 256;
+  }
   return 16 + 36*(r*6/256) + 6*(g*6/256) + (b*6/256);
 # undef comp
 }
 
-void
+  void
 print_pixel(struct image *image, struct pixel *pixel)
 {
   //foreground, or upper pixel
   int fg = convert_pixel(image, pixel->x, pixel->y)
-  //background or lower pixel
+    //background or lower pixel
     , bg = pixel->y + 1 < image->height
-           ? convert_pixel(image, pixel->x, pixel->y + 1)
-           : BLANK
-  //if there is a new fg, only bg is used if both are the same, so fg remains
-  //unchanged
+         ? convert_pixel(image, pixel->x, pixel->y + 1)
+         : BLANK
+    //if there is a new fg, only bg is used if both are the same, so fg remains
+    //unchanged
     , newfg = fg != pixel->prev.fg && bg != fg
-  //If ther is a new bg
+    //If ther is a new bg
     , newbg = bg != pixel->prev.bg
     , swap  = fg == 0 && fg != bg;
 
@@ -133,32 +142,41 @@ print_pixel(struct image *image, struct pixel *pixel)
   }
 
   if(newfg || newbg) {
-      printf("\033[");
+    printf("\033[");
+    if(newfg) {
+      printf("38;5;%u", fg);
+    }
+    if(newbg) {
       if(newfg) {
-        printf("38;5;%u", fg);
+        putchar(';');
       }
-      if(newbg) {
-        if(newfg) putchar(';');
-        if(bg == BLANK)
-          printf("49");
-        else
-          printf("48;5;%u", bg);
+      if(bg == BLANK) {
+        printf("49");
+      } else {
+        printf("48;5;%u", bg);
       }
-      putchar('m');
+    }
+    putchar('m');
   }
-  if(newfg) pixel->prev.fg = fg;
-  if(newbg) pixel->prev.bg = bg;
+  if(newfg) {
+    pixel->prev.fg = fg;
+  }
+  if(newbg) {
+    pixel->prev.bg = bg;
+  }
 
   //deterimine What to draw
-  if(fg == bg)
+  if(fg == bg) {
     putchar(' ');
-  else
+  } else {
     printf(swap ? BOT : TOP);
+  }
 
   if(pixel->x+1 >= image->width) {
     printf("\033[0m");
-    if(pixel->y+2 >= image->height)
+    if(pixel->y+2 >= image->height) {
       putchar('\n');
+    }
     putchar('\n');
     pixel->prev.bg = pixel->prev.fg = 0;
   }
