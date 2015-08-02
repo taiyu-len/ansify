@@ -2,6 +2,7 @@
 # include <stdio.h>
 # include <getopt.h>
 # include <errno.h>
+# include <unistd.h>
 # define STB_IMAGE_IMPLEMENTATION
 # include "stb_image.h"
 
@@ -39,9 +40,10 @@ static int thresh = 10;
 int
 main ( int argc, char *argv[])
 {
-  int c;
+  int c,
+      delay = 0;
 
-  while((c = getopt(argc, argv, "k:t:")) != -1)
+  while((c = getopt(argc, argv, "k:t:d:")) != -1)
     switch(c) {
       case 'k'://colorkey
         if(sscanf(optarg,"%x:%x:%x",key, key+1, key+2) < 3) {
@@ -51,6 +53,13 @@ main ( int argc, char *argv[])
         }
       case 't'://threshhold
         thresh = strtol(optarg,NULL, 10);
+        if(errno) {
+          fprintf(stderr,"invalid input. -t %%d\n");
+          thresh = 10;
+          continue;
+        }
+      case 'd'://threshhold
+        delay = strtol(optarg,NULL, 10);
         if(errno) {
           fprintf(stderr,"invalid input. -t %%d\n");
           thresh = 10;
@@ -70,7 +79,7 @@ main ( int argc, char *argv[])
       else       fputs("Invalid image file\n\n", stderr);
       continue;
     }
-    for(; pixel.y < orig.height; pixel.y+=2)
+    for(; pixel.y < orig.height; pixel.y+=2, delay?usleep(delay):0)
       for(pixel.x = 0; pixel.x < orig.width; ++pixel.x)
         print_pixel(&orig, &pixel);
 
