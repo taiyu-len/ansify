@@ -106,9 +106,9 @@ convert_pixel(struct image *image, int x, int y)
     , a = image->comp == 4 ? comp(3) : 0xFF,
       bw = (r + g + b)/3;
 
-  if( a < 2 ||(abs(r-key[0]) <= thresh
-            && abs(g-key[1]) <= thresh
-            && abs(b-key[2]) <= thresh)) {
+  if( a < 99 ||(abs(r-key[0]) <= thresh
+             && abs(g-key[1]) <= thresh
+             && abs(b-key[2]) <= thresh)) {
     return BLANK;
   }
   //Check for grey scale, and calculate it better
@@ -121,7 +121,7 @@ convert_pixel(struct image *image, int x, int y)
 # undef comp
 }
 
-  void
+void
 print_pixel(struct image *image, struct pixel *pixel)
 {
   //foreground, or upper pixel
@@ -178,7 +178,8 @@ print_pixel(struct image *image, struct pixel *pixel)
       putchar('\n');
     }
     putchar('\n');
-    pixel->prev.bg = pixel->prev.fg = 0;
+    pixel->prev.bg = 0;
+    pixel->prev.fg = -10;
   }
 }
 
