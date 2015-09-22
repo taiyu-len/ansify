@@ -1,7 +1,7 @@
 ANSIFY
 ======
 
-turns images into simple ascii art.
+turns images into simple ansicolored block pictures.
 
 usages
 ------
