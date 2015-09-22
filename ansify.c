@@ -2,7 +2,7 @@
 # include <stdio.h>
 # include <getopt.h>
 # include <errno.h>
-# include <unistd.h>
+# include <time.h>
 # define STB_IMAGE_IMPLEMENTATION
 # include "stb_image.h"
 
@@ -40,8 +40,8 @@ static int thresh = 10;
 int
 main ( int argc, char *argv[])
 {
-  int c,
-      delay = 0;
+  int c;
+  struct timespec delay = {0, 0};
 
   while((c = getopt(argc, argv, "k:t:d:")) != -1)
     switch(c) {
@@ -59,7 +59,7 @@ main ( int argc, char *argv[])
           continue;
         }
       case 'd'://Delay
-        delay = strtol(optarg, NULL, 10);
+        delay.tv_nsec = strtol(optarg, NULL, 10) * 1000000;
         if(errno) {
           fprintf(stderr, "invalid input. -t %%d\n");
           thresh = 10;
@@ -86,8 +86,8 @@ main ( int argc, char *argv[])
       for(pixel.x = 0; pixel.x < orig.width; ++pixel.x) {
         print_pixel(&orig, &pixel);
       }
-      if(delay) {
-        usleep(delay);
+      if(delay.tv_nsec) {
+        nanosleep(&delay,&delay);
       }
     }
     stbi_image_free(orig.data);
