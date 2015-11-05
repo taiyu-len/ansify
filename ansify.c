@@ -46,26 +46,25 @@ main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, "k:t:d:")) != -1)
 		switch (c) {
 		case 'k'://colorkey
-			if(sscanf(optarg, "%x:%x:%x", key, key+1, key+2) < 3) {
+			if (sscanf(optarg, "%x:%x:%x", key, key+1, key+2) < 3) {
 				fprintf(stderr, "invalid input. -k %%x:%%x:%%x\n");
 				key[0] = key[1] = key[2] = -999;
-				continue;
 			}
+			break;
 		case 't'://threshhold
 			thresh = strtol(optarg, NULL, 10);
-			if(errno) {
+			if (errno) {
 				fprintf(stderr, "invalid input. -t %%d\n");
 				thresh = 10;
-				continue;
 			}
+			break;
 		case 'd'://Delay
 			delay.tv_nsec = strtol(optarg, NULL, 10) * 1000000;
-			if(errno) {
+			if (errno) {
 				fprintf(stderr, "invalid input. -t %%d\n");
 				thresh = 10;
-				continue;
 			}
-		default: break;
+			break;
 		}
 
 	while (argv[optind]) {
