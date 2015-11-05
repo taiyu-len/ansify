@@ -62,7 +62,6 @@ main(int argc, char *argv[])
 			delay.tv_nsec = strtol(optarg, NULL, 10) * 1000000;
 			if (errno) {
 				fprintf(stderr, "invalid input. -t %%d\n");
-				thresh = 10;
 			}
 			break;
 		}
@@ -76,8 +75,10 @@ main(int argc, char *argv[])
 		                      &orig.height,
 		                      &orig.comp, 0);
 		if (orig.data == NULL) {
-			if (errno)
-				perror(NULL); errno=0;
+			if (errno) {
+				perror(NULL);
+				errno=0;
+			}
 			else
 				fputs("Invalid image file\n\n", stderr);
 			continue;
