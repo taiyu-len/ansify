@@ -3,10 +3,14 @@ ANSIFY
 
 turns images into simple ansicolored block pictures.
 
+installing
+----------
+`make install`
+
 usages
 ------
 ```
-./ansify -k nn:nn:nn -t 1 -d 10000 image1 image2 image3 ... imagen > file
+ansify -k nn:nn:nn -t 1 -d 10000 image1 image2 image3 ... imagen > file
 ```
 -k chooses the transparent color key. (default is none)
 
