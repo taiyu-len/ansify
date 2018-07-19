@@ -1,8 +1,8 @@
-CFLAGS=-std=c11 -Wall -Wextra
+CFLAGS=-std=c11 -Wall -Wextra -g
 LDLIBS=-lm
 PREFIX=/usr/local
 
-ansify: ansify.c
+ansify: main.o ansify.o
 
 clean:
 	rm ansify
